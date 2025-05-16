@@ -31,12 +31,12 @@ const ApplyDamageModal: React.FC<ApplyDamageModalProps> = ({ isOpen, onClose }) 
           <X size={20} />
         </button>
         
-        <h2 className="text-2xl font-bold mb-4 text-red-500">Apply Damage</h2>
+        <h2 className="text-2xl font-bold mb-4 text-red-500">Aplicar Dano</h2>
         
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
             <label htmlFor="damageAmount" className="block text-sm font-medium text-gray-300 mb-1">
-              Damage Amount
+              Quantidade de Dano
             </label>
             <input
               type="number"
@@ -52,7 +52,7 @@ const ApplyDamageModal: React.FC<ApplyDamageModalProps> = ({ isOpen, onClose }) 
           
           <div className="mb-4">
             <label htmlFor="repetitions" className="block text-sm font-medium text-gray-300 mb-1">
-              Number of Hits
+              Número de Golpes
             </label>
             <input
               type="number"
@@ -74,7 +74,7 @@ const ApplyDamageModal: React.FC<ApplyDamageModalProps> = ({ isOpen, onClose }) 
                 onChange={(e) => setTrueDamage(e.target.checked)}
                 className="w-4 h-4 text-red-600 border-gray-300 rounded focus:ring-red-500"
               />
-              <span className="text-gray-300">True Damage (ignores armor)</span>
+              <span className="text-gray-300">Dano Verdadeiro (ignora armadura)</span>
             </label>
           </div>
           
@@ -84,13 +84,13 @@ const ApplyDamageModal: React.FC<ApplyDamageModalProps> = ({ isOpen, onClose }) 
               onClick={onClose}
               className="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors"
             >
-              Cancel
+              Cancelar
             </button>
             <button
               type="submit"
               className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
             >
-              Apply Damage
+              Aplicar Dano
             </button>
           </div>
         </form>
