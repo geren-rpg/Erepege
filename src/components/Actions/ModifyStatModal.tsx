@@ -92,11 +92,11 @@ const ModifyStatModal: React.FC<ModifyStatModalProps> = ({
                 type="number"
                 id="amount"
                 value={amount}
-                onChange={(e) => setAmount(Math.max(0, parseInt(e.target.value) || 0))}
+                onChange={(e) => setAmount(Math.max(0, Math.min(1000, parseInt(e.target.value) || 0)))}
                 className="flex-1 px-3 py-2 bg-gray-700 text-white rounded-l border border-gray-600 
                           focus:outline-none focus:ring-2 focus:ring-blue-500"
                 min={0}
-                max={isPercentage ? 100 : undefined}
+                max={isPercentage ? 100 : 1000}
                 required
               />
               <button

@@ -7,6 +7,7 @@ interface StatInputProps {
   icon?: ReactNode;
   min?: number;
   max?: number;
+  allowExceedMax?: boolean;
 }
 
 const StatInput: React.FC<StatInputProps> = ({ 
@@ -15,8 +16,11 @@ const StatInput: React.FC<StatInputProps> = ({
   onChange, 
   icon, 
   min = 0, 
-  max 
+  max = 1000,
+  allowExceedMax = false
 }) => {
+  const effectiveMax = allowExceedMax ? 1000 : max;
+
   return (
     <div className="flex flex-col">
       <label className="flex items-center gap-2 text-sm font-medium text-gray-300 mb-1">
@@ -38,19 +42,19 @@ const StatInput: React.FC<StatInputProps> = ({
           value={value}
           onChange={(e) => {
             const newValue = parseInt(e.target.value) || min;
-            onChange(max !== undefined ? Math.min(max, newValue) : newValue);
+            onChange(effectiveMax !== undefined ? Math.min(effectiveMax, Math.max(min, newValue)) : newValue);
           }}
-          className="w-16 text-center py-1 bg-gray-700 text-white border-y border-gray-600 
+          className="w-20 text-center py-1 bg-gray-700 text-white border-y border-gray-600 
                      focus:outline-none focus:ring-0"
           min={min}
-          max={max}
+          max={effectiveMax}
         />
         <button
           type="button"
           className="px-2 py-1 bg-gray-700 text-white rounded-r border border-gray-600 
                      hover:bg-gray-600 transition-colors"
-          onClick={() => onChange(max !== undefined ? Math.min(max, value + 1) : value + 1)}
-          disabled={max !== undefined && value >= max}
+          onClick={() => onChange(effectiveMax !== undefined ? Math.min(effectiveMax, value + 1) : value + 1)}
+          disabled={effectiveMax !== undefined && value >= effectiveMax}
         >
           +
         </button>

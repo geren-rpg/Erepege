@@ -74,6 +74,7 @@ const CreateCharacter: React.FC = () => {
               onChange={(value) => updateStat('maxHp', value)}
               icon={<Heart className="w-5 h-5 text-red-500" />}
               min={1}
+              max={1000}
             />
             
             <StatInput 
@@ -82,6 +83,7 @@ const CreateCharacter: React.FC = () => {
               onChange={(value) => updateStat('maxArmor', value)}
               icon={<Shield className="w-5 h-5 text-blue-500" />}
               min={0}
+              max={1000}
             />
             
             <StatInput 
@@ -99,6 +101,7 @@ const CreateCharacter: React.FC = () => {
               onChange={(value) => updateStat('maxMana', value)}
               icon={<Zap className="w-5 h-5 text-blue-400" />}
               min={0}
+              max={1000}
             />
           </div>
         </div>
