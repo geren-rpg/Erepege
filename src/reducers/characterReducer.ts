@@ -63,34 +63,34 @@ const calculateNewValue = (
   let newValue = currentValue;
   
   if (isPercentage) {
-    const percentageAmount = maxValue * (amount / 100);
+    const percentageAmount = Math.floor(maxValue * (amount / 100));
     
     switch (operation) {
       case "set":
         newValue = percentageAmount;
         break;
       case "increase":
-        newValue = currentValue + percentageAmount;
+        newValue = Math.floor(currentValue + percentageAmount);
         break;
       case "decrease":
-        newValue = currentValue - percentageAmount;
+        newValue = Math.floor(currentValue - percentageAmount);
         break;
     }
   } else {
     switch (operation) {
       case "set":
-        newValue = amount;
+        newValue = Math.floor(amount);
         break;
       case "increase":
-        newValue = currentValue + amount;
+        newValue = Math.floor(currentValue + amount);
         break;
       case "decrease":
-        newValue = currentValue - amount;
+        newValue = Math.floor(currentValue - amount);
         break;
     }
   }
   
-  return exceedMax ? Math.max(0, newValue) : Math.min(maxValue, Math.max(0, newValue));
+  return exceedMax ? Math.max(0, Math.floor(newValue)) : Math.min(maxValue, Math.max(0, Math.floor(newValue)));
 };
 
 export const characterReducer = (state: CharacterState, action: CharacterAction): CharacterState => {
@@ -139,28 +139,28 @@ export const characterReducer = (state: CharacterState, action: CharacterAction)
       
       const { damageAmount, trueDamage, repetitions } = action.payload;
       
-      let remainingArmor = character.currentStats.armor;
-      let remainingHp = character.currentStats.hp;
+      let remainingArmor = Math.floor(character.currentStats.armor);
+      let remainingHp = Math.floor(character.currentStats.hp);
       let totalDamage = 0;
       
       for (let i = 0; i < repetitions; i++) {
         if (trueDamage) {
-          remainingHp = Math.max(0, remainingHp - damageAmount);
-          totalDamage += damageAmount;
+          remainingHp = Math.floor(Math.max(0, remainingHp - damageAmount));
+          totalDamage += Math.floor(damageAmount);
         } else {
           if (remainingArmor > 0) {
             if (damageAmount <= remainingArmor) {
-              remainingArmor -= damageAmount;
-              totalDamage += damageAmount;
+              remainingArmor = Math.floor(remainingArmor - damageAmount);
+              totalDamage += Math.floor(damageAmount);
             } else {
-              const remainingDamage = damageAmount - remainingArmor;
-              totalDamage += damageAmount;
+              const remainingDamage = Math.floor(damageAmount - remainingArmor);
+              totalDamage += Math.floor(damageAmount);
               remainingArmor = 0;
-              remainingHp = Math.max(0, remainingHp - remainingDamage);
+              remainingHp = Math.floor(Math.max(0, remainingHp - remainingDamage));
             }
           } else {
-            remainingHp = Math.max(0, remainingHp - damageAmount);
-            totalDamage += damageAmount;
+            remainingHp = Math.floor(Math.max(0, remainingHp - damageAmount));
+            totalDamage += Math.floor(damageAmount);
           }
         }
       }
@@ -168,9 +168,9 @@ export const characterReducer = (state: CharacterState, action: CharacterAction)
       if (action.payload.action) {
         action.payload.action.details = {
           ...action.payload.action.details,
-          finalArmor: remainingArmor,
-          finalHp: remainingHp,
-          totalDamage
+          finalArmor: Math.floor(remainingArmor),
+          finalHp: Math.floor(remainingHp),
+          totalDamage: Math.floor(totalDamage)
         };
       }
       
@@ -178,8 +178,8 @@ export const characterReducer = (state: CharacterState, action: CharacterAction)
         ...character,
         currentStats: {
           ...character.currentStats,
-          armor: remainingArmor,
-          hp: remainingHp
+          armor: Math.floor(remainingArmor),
+          hp: Math.floor(remainingHp)
         },
         updatedAt: new Date()
       };
