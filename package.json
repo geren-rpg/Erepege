@@ -1,5 +1,6 @@
 {
   "name": "erepege",
+  "description": "Gerenciador de Personagens para RPG",
   "private": true,
   "version": "1.0.0",
   "type": "module",

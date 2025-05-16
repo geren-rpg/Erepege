@@ -60,7 +60,7 @@ function App() {
         </main>
         
         <footer className="bg-gray-900 text-gray-400 text-center py-4 text-sm">
-          <p>© 2025 RPG Character Manager</p>
+          <p>© Erepege foda-se</p>
         </footer>
         
         {/* Hidden buttons for keyboard shortcuts */}
