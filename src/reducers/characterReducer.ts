@@ -50,7 +50,14 @@ type CharacterAction =
       action: any;
     } 
   }
-  | { type: 'RESTORE_CHARACTER'; payload: { character: Character } };
+  | { type: ActionType.UPDATE_RESISTANCES; payload: { // Adicionado tipo de payload para UPDATE_RESISTANCES
+      character: Character; // O personagem atualizado com as novas resistências
+      details: any;
+      action: any;
+    } 
+  }
+  | { type: 'RESTORE_CHARACTER'; payload: { character: Character } }
+  | { type: 'REMOVE_CHARACTER'; payload: { id: string } }; // Adicionado para desfazer criação
 
 const calculateNewValue = (
   operation: "set" | "increase" | "decrease",
@@ -131,6 +138,20 @@ export const characterReducer = (state: CharacterState, action: CharacterAction)
       };
     }
 
+     case 'REMOVE_CHARACTER': { // Adicionado tratamento para remover personagem (para desfazer criação)
+       const newCharacters = state.characters.filter(char => char.id !== action.payload.id);
+       const newSelectedId = state.selectedCharacterId === action.payload.id
+         ? (newCharacters.length > 0 ? newCharacters[0].id : null)
+         : state.selectedCharacterId;
+         
+       return {
+         ...state,
+         characters: newCharacters,
+         selectedCharacterId: newSelectedId
+       };
+     }
+
+
     case ActionType.APPLY_DAMAGE: {
       if (!state.selectedCharacterId) return state;
       
@@ -165,14 +186,8 @@ export const characterReducer = (state: CharacterState, action: CharacterAction)
         }
       }
       
-      if (action.payload.action) {
-        action.payload.action.details = {
-          ...action.payload.action.details,
-          finalArmor: Math.floor(remainingArmor),
-          finalHp: Math.floor(remainingHp),
-          totalDamage: Math.floor(totalDamage)
-        };
-      }
+       // Os detalhes da ação já são populados em executeAction antes de chegar aqui.
+
       
       const updatedCharacter: Character = {
         ...character,
@@ -205,11 +220,8 @@ export const characterReducer = (state: CharacterState, action: CharacterAction)
       const manaToRegenerate = Math.floor(maxMana * (manaRegenerationPercent / 100));
       const newMana = Math.min(maxMana, currentMana + manaToRegenerate);
       
-      if (action.payload.action) {
-        action.payload.action.details = {
-          manaRegained: newMana - currentMana
-        };
-      }
+       // Os detalhes da ação já são populados em executeAction antes de chegar aqui.
+
       
       const updatedCharacter: Character = {
         ...character,
@@ -242,7 +254,7 @@ export const characterReducer = (state: CharacterState, action: CharacterAction)
                       action.type === ActionType.MODIFY_ARMOR ? 'armor' : 'mana';
       
       const currentValue = character.currentStats[statType];
-      const maxValue = character.currentStats[`max${statType.charAt(0).toUpperCase() + statType.slice(1)}`];
+      const maxValue = character.currentStats[`max${statType.charAt(0).toUpperCase() + statType.slice(1)}` as keyof CharacterStats];
       
       const newValue = calculateNewValue(
         operation,
@@ -253,14 +265,9 @@ export const characterReducer = (state: CharacterState, action: CharacterAction)
         exceedMax
       );
       
-      if (action.payload.action) {
-        action.payload.action.details = {
-          ...action.payload.action.details,
-          statType,
-          newValue
-        };
-      }
-      
+       // Os detalhes da ação já são populados em executeAction antes de chegar aqui.
+
+
       const updatedCharacter: Character = {
         ...character,
         currentStats: {
@@ -304,28 +311,52 @@ export const characterReducer = (state: CharacterState, action: CharacterAction)
     }
 
     case ActionType.UPDATE_INITIAL_STATS: {
-      if (!state.selectedCharacterId) return state;
-      
+       // O objeto character atualizado já está no payload
       return {
         ...state,
         characters: state.characters.map(char => 
-          char.id === state.selectedCharacterId 
+          char.id === action.payload.character.id 
             ? action.payload.character
             : char
         )
       };
     }
 
-    case 'RESTORE_CHARACTER':
+    case ActionType.UPDATE_RESISTANCES: { // Adicionado case para UPDATE_RESISTANCES
+       // O objeto character atualizado já está no payload
       return {
         ...state,
         characters: state.characters.map(char => 
           char.id === action.payload.character.id 
-            ? action.payload.character 
+            ? action.payload.character // Usar o personagem atualizado do payload
             : char
-        ),
-        selectedCharacterId: action.payload.character.id
+        )
       };
+    }
+
+
+    case 'RESTORE_CHARACTER':
+      // Encontrar o índice do personagem a ser restaurado
+      const indexToRestore = state.characters.findIndex(char => char.id === action.payload.character.id);
+
+      if (indexToRestore > -1) {
+        // Substituir o personagem naquele índice
+        const newCharacters = [...state.characters];
+        newCharacters[indexToRestore] = action.payload.character;
+         return {
+           ...state,
+           characters: newCharacters,
+           selectedCharacterId: action.payload.character.id // Selecionar o personagem restaurado
+         };
+      } else {
+        // Se o personagem não existir (por exemplo, desfazendo uma exclusão), adicioná-lo
+        return {
+           ...state,
+           characters: [...state.characters, action.payload.character],
+           selectedCharacterId: action.payload.character.id // Selecionar o personagem restaurado
+        };
+      }
+
 
     default:
       return state;

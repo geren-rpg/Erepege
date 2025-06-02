@@ -1,4 +1,4 @@
-import { Character, CharacterStats } from "./character";
+import { Character, CharacterStats, CharacterResistances } from "./character";
 
 export enum ActionType {
   CREATE_CHARACTER = "CREATE_CHARACTER",
@@ -11,6 +11,7 @@ export enum ActionType {
   MODIFY_MANA = "MODIFY_MANA",
   RESET_CHARACTER = "RESET_CHARACTER",
   UPDATE_INITIAL_STATS = "UPDATE_INITIAL_STATS",
+  UPDATE_RESISTANCES = "UPDATE_RESISTANCES", // Added new action type
 }
 
 export interface CharacterAction {
@@ -31,7 +32,8 @@ export type ActionDetails =
   | AdvanceTurnDetails
   | ModifyStatDetails
   | ResetCharacterDetails
-  | UpdateInitialStatsDetails;
+  | UpdateInitialStatsDetails
+  | UpdateResistancesDetails; // Added new details type
 
 export interface CreateCharacterDetails {
   name: string;
@@ -75,4 +77,10 @@ export interface ResetCharacterDetails {
 export interface UpdateInitialStatsDetails {
   oldStats: CharacterStats;
   newStats: CharacterStats;
+}
+
+// Define details for the new action type
+export interface UpdateResistancesDetails {
+  oldResistances: CharacterResistances;
+  newResistances: CharacterResistances;
 }

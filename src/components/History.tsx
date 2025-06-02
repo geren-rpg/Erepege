@@ -1,7 +1,8 @@
 import React from 'react';
 import { useCharacters } from '../contexts/CharacterContext';
-import { ActionType, CharacterAction } from '../types/actions';
-import { Clock, AlertTriangle, Info } from 'lucide-react';
+// Importar todas as interfaces de detalhes de ação
+import { ActionType, CharacterAction, CreateCharacterDetails, DeleteCharacterDetails, ApplyDamageDetails, AdvanceTurnDetails, ModifyStatDetails, ResetCharacterDetails, UpdateInitialStatsDetails, UpdateResistancesDetails } from '../types/actions';
+import { Clock, AlertTriangle, Info, Shield } from 'lucide-react'; // Importar Shield para o ícone de resistência
 
 const History: React.FC = () => {
   const { history, selectedCharacter } = useCharacters();
@@ -23,56 +24,72 @@ const History: React.FC = () => {
     
     switch (type) {
       case ActionType.CREATE_CHARACTER:
-        return `Personagem "${(details as any).name}" foi criado`;
+        // Usar asserção de tipo para acessar propriedades com segurança
+        const createDetails = details as CreateCharacterDetails;
+        return `Personagem "${createDetails.name}" foi criado`;
         
       case ActionType.UPDATE_CHARACTER:
+        // Detalhes genéricos, manter descrição simples
         return `Detalhes do personagem foram atualizados`;
         
       case ActionType.DELETE_CHARACTER:
-        return `Personagem "${(details as any).name}" foi deletado`;
+        const deleteDetails = details as DeleteCharacterDetails;
+        return `Personagem "${deleteDetails.name}" foi deletado`;
         
       case ActionType.APPLY_DAMAGE: {
-        const damageDetails = details as any;
+        const damageDetails = details as ApplyDamageDetails;
+        // Acessar propriedades tipadas
         return `Aplicou ${damageDetails.totalDamage} de dano (${damageDetails.repetitions}×${damageDetails.damageAmount}) 
                 ${damageDetails.trueDamage ? '(dano verdadeiro)' : ''}. 
                 Armadura: ${damageDetails.finalArmor}, Vida: ${damageDetails.finalHp}`;
       }
         
       case ActionType.ADVANCE_TURN:
-        return `Avançou turno, regenerou ${(details as any).manaRegained} de mana`;
+        const advanceDetails = details as AdvanceTurnDetails;
+        return `Avançou turno, regenerou ${advanceDetails.manaRegained} de mana`;
         
-      case ActionType.MODIFY_HP: {
-        const hpDetails = details as any;
-        const operation = hpDetails.operation === 'set' ? 'Definiu' :
-                         hpDetails.operation === 'increase' ? 'Aumentou' : 'Diminuiu';
-        return `${operation} Vida em ${hpDetails.amount}${hpDetails.isPercentage ? '%' : ''} 
-                (${hpDetails.oldValue} → ${hpDetails.newValue})`;
-      }
-        
-      case ActionType.MODIFY_ARMOR: {
-        const armorDetails = details as any;
-        const operation = armorDetails.operation === 'set' ? 'Definiu' :
-                         armorDetails.operation === 'increase' ? 'Aumentou' : 'Diminuiu';
-        return `${operation} Armadura em ${armorDetails.amount}${armorDetails.isPercentage ? '%' : ''} 
-                (${armorDetails.oldValue} → ${armorDetails.newValue})`;
-      }
-
+      case ActionType.MODIFY_HP:
+      case ActionType.MODIFY_ARMOR:
       case ActionType.MODIFY_MANA: {
-        const manaDetails = details as any;
-        const operation = manaDetails.operation === 'set' ? 'Definiu' :
-                         manaDetails.operation === 'increase' ? 'Aumentou' : 'Diminuiu';
-        return `${operation} Mana em ${manaDetails.amount}${manaDetails.isPercentage ? '%' : ''} 
-                (${manaDetails.oldValue} → ${manaDetails.newValue})`;
+        const modifyDetails = details as ModifyStatDetails;
+        const operation = modifyDetails.operation === 'set' ? 'Definiu' :
+                         modifyDetails.operation === 'increase' ? 'Aumentou' : 'Diminuiu';
+        const statName = modifyDetails.statType === 'hp' ? 'Vida' :
+                         modifyDetails.statType === 'armor' ? 'Armadura' : 'Mana';
+         // Acessar propriedades tipadas
+        return `${operation} ${statName} em ${modifyDetails.amount}${modifyDetails.isPercentage ? '%' : ''} 
+                (${modifyDetails.oldValue} → ${modifyDetails.newValue})`;
       }
         
       case ActionType.RESET_CHARACTER:
         return `Status do personagem foram resetados para os valores iniciais`;
         
       case ActionType.UPDATE_INITIAL_STATS:
+         // Detalhes incluem oldStats e newStats, poderia mostrar mudanças específicas se desejado
         return `Status iniciais foram atualizados`;
         
+      case ActionType.UPDATE_RESISTANCES: { // Novo case para UPDATE_RESISTANCES
+          const resistanceDetails = details as UpdateResistancesDetails;
+          const changes: string[] = [];
+          // Iterar sobre as resistências para encontrar as mudanças
+          for (const key in resistanceDetails.newResistances) {
+            const type = key as keyof UpdateResistancesDetails['newResistances'];
+            if (resistanceDetails.newResistances[type] !== resistanceDetails.oldResistances[type]) {
+               changes.push(`${type}: ${resistanceDetails.oldResistances[type]} → ${resistanceDetails.newResistances[type]}`);
+            }
+          }
+           if (changes.length > 0) {
+             return `Resistências atualizadas: ${changes.join(', ')}`;
+           } else {
+             return `Resistências foram atualizadas (sem mudanças)`;
+           }
+      }
+
+
       default:
-        return 'Ação desconhecida';
+        // Logar ações desconhecidas para depuração futura
+        console.warn("Unknown action type in history:", type, details);
+        return `Ação desconhecida (Tipo: ${type})`;
     }
   };
   
@@ -82,9 +99,11 @@ const History: React.FC = () => {
     switch (type) {
       case ActionType.APPLY_DAMAGE:
         return <AlertTriangle size={16} className="text-red-500" />;
-      case ActionType.ADVANCE_TURN:
+      case ActionType.ADVANCE_TURN:\
         return <Clock size={16} className="text-blue-400" />;
-      default:
+      case ActionType.UPDATE_RESISTANCES: // Ícone para atualização de resistências
+         return <Shield size={16} className="text-green-400" />;
+      default:\
         return <Info size={16} className="text-gray-400" />;
     }
   };
