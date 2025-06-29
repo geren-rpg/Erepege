@@ -9,15 +9,19 @@ interface ApplyDamageModalProps {
 
 const ApplyDamageModal: React.FC<ApplyDamageModalProps> = ({ isOpen, onClose }) => {
   const { applyDamage } = useCharacters();
-  const [damageAmount, setDamageAmount] = useState(10);
+  const [damageAmount, setDamageAmount] = useState<string>('10');
   const [trueDamage, setTrueDamage] = useState(false);
-  const [repetitions, setRepetitions] = useState(1);
+  const [repetitions, setRepetitions] = useState<string>('1');
 
   if (!isOpen) return null;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    applyDamage(damageAmount, trueDamage, repetitions);
+
+    const damage = Number(damageAmount) || 0;
+    const reps = Number(repetitions) || 0;
+
+    applyDamage(damage, trueDamage, reps);
     onClose();
   };
 
@@ -30,9 +34,9 @@ const ApplyDamageModal: React.FC<ApplyDamageModalProps> = ({ isOpen, onClose }) 
         >
           <X size={20} />
         </button>
-        
+
         <h2 className="text-2xl font-bold mb-4 text-red-500">Aplicar Dano</h2>
-        
+
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
             <label htmlFor="damageAmount" className="block text-sm font-medium text-gray-300 mb-1">
@@ -42,14 +46,14 @@ const ApplyDamageModal: React.FC<ApplyDamageModalProps> = ({ isOpen, onClose }) 
               type="number"
               id="damageAmount"
               value={damageAmount}
-              onChange={(e) => setDamageAmount(Math.max(1, parseInt(e.target.value) || 1))}
+              onChange={(e) => setDamageAmount(e.target.value)}
               className="w-full px-3 py-2 bg-gray-700 text-white rounded border border-gray-600 
                         focus:outline-none focus:ring-2 focus:ring-red-500"
               min="1"
               required
             />
           </div>
-          
+
           <div className="mb-4">
             <label htmlFor="repetitions" className="block text-sm font-medium text-gray-300 mb-1">
               Número de Golpes
@@ -58,14 +62,14 @@ const ApplyDamageModal: React.FC<ApplyDamageModalProps> = ({ isOpen, onClose }) 
               type="number"
               id="repetitions"
               value={repetitions}
-              onChange={(e) => setRepetitions(Math.max(1, parseInt(e.target.value) || 1))}
+              onChange={(e) => setRepetitions(e.target.value)}
               className="w-full px-3 py-2 bg-gray-700 text-white rounded border border-gray-600 
                         focus:outline-none focus:ring-2 focus:ring-red-500"
               min="1"
               required
             />
           </div>
-          
+
           <div className="mb-6">
             <label className="flex items-center space-x-2 cursor-pointer">
               <input
@@ -77,7 +81,7 @@ const ApplyDamageModal: React.FC<ApplyDamageModalProps> = ({ isOpen, onClose }) 
               <span className="text-gray-300">Dano Verdadeiro (ignora armadura)</span>
             </label>
           </div>
-          
+
           <div className="flex justify-end space-x-4">
             <button
               type="button"

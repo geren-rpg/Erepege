@@ -10,15 +10,15 @@ interface ModifyStatModalProps {
   allowExceedMax?: boolean;
 }
 
-const ModifyStatModal: React.FC<ModifyStatModalProps> = ({ 
-  isOpen, 
-  onClose, 
-  statType, 
+const ModifyStatModal: React.FC<ModifyStatModalProps> = ({
+  isOpen,
+  onClose,
+  statType,
   title,
   allowExceedMax = false
 }) => {
   const { modifyHp, modifyArmor, modifyMana, selectedCharacter } = useCharacters();
-  const [amount, setAmount] = useState(10);
+  const [amount, setAmount] = useState<string>('10');
   const [operation, setOperation] = useState<"set" | "increase" | "decrease">("increase");
   const [isPercentage, setIsPercentage] = useState(false);
   const [exceedMax, setExceedMax] = useState(false);
@@ -27,15 +27,17 @@ const ModifyStatModal: React.FC<ModifyStatModalProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
+    const numericAmount = Number(amount) || 0;
+
     if (statType === "hp") {
-      modifyHp(operation, amount, isPercentage, exceedMax);
+      modifyHp(operation, numericAmount, isPercentage, exceedMax);
     } else if (statType === "armor") {
-      modifyArmor(operation, amount, isPercentage, exceedMax);
+      modifyArmor(operation, numericAmount, isPercentage, exceedMax);
     } else {
-      modifyMana(operation, amount, isPercentage, exceedMax);
+      modifyMana(operation, numericAmount, isPercentage, exceedMax);
     }
-    
+
     onClose();
   };
 
@@ -47,11 +49,11 @@ const ModifyStatModal: React.FC<ModifyStatModalProps> = ({
     }
   };
 
-  const maxValue = statType === "hp" 
-    ? selectedCharacter.currentStats.maxHp 
+  const maxValue = statType === "hp"
+    ? selectedCharacter.currentStats.maxHp
     : statType === "armor"
-    ? selectedCharacter.currentStats.maxArmor
-    : selectedCharacter.currentStats.maxMana;
+      ? selectedCharacter.currentStats.maxArmor
+      : selectedCharacter.currentStats.maxMana;
 
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-70 animate-fadeIn">
@@ -62,9 +64,9 @@ const ModifyStatModal: React.FC<ModifyStatModalProps> = ({
         >
           <X size={20} />
         </button>
-        
+
         <h2 className="text-2xl font-bold mb-4 text-blue-500">{title}</h2>
-        
+
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
             <label htmlFor="operation" className="block text-sm font-medium text-gray-300 mb-1">
@@ -82,7 +84,7 @@ const ModifyStatModal: React.FC<ModifyStatModalProps> = ({
               <option value="decrease">Diminuir valor</option>
             </select>
           </div>
-          
+
           <div className="mb-4">
             <label htmlFor="amount" className="block text-sm font-medium text-gray-300 mb-1">
               {getOperationLabel(operation)}
@@ -92,7 +94,7 @@ const ModifyStatModal: React.FC<ModifyStatModalProps> = ({
                 type="number"
                 id="amount"
                 value={amount}
-                onChange={(e) => setAmount(Math.max(0, Math.min(1000, parseInt(e.target.value) || 0)))}
+                onChange={(e) => setAmount(e.target.value)}
                 className="flex-1 px-3 py-2 bg-gray-700 text-white rounded-l border border-gray-600 
                           focus:outline-none focus:ring-2 focus:ring-blue-500"
                 min={0}
@@ -103,17 +105,17 @@ const ModifyStatModal: React.FC<ModifyStatModalProps> = ({
                 type="button"
                 onClick={() => setIsPercentage(!isPercentage)}
                 className={`px-3 py-2 rounded-r border border-gray-600 font-medium
-                            ${isPercentage 
-                              ? 'bg-blue-600 text-white' 
-                              : 'bg-gray-700 text-gray-300 hover:bg-gray-600'}`}
+                            ${isPercentage
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-700 text-gray-300 hover:bg-gray-600'}`}
               >
                 {isPercentage ? '%' : 'val'}
               </button>
             </div>
             <p className="text-xs text-gray-400 mt-1">
-              {isPercentage 
-                ? `${amount}% do máximo de ${statType.toUpperCase()} (${Math.round(maxValue * (amount / 100))})`
-                : `Valor absoluto: ${amount}`}
+              {isPercentage
+                ? `${amount}% do máximo de ${statType.toUpperCase()} (${Math.round(maxValue * (Number(amount) / 100))})`
+                : `Valor absoluto: ${amount || 0}`}
             </p>
           </div>
 
@@ -130,7 +132,7 @@ const ModifyStatModal: React.FC<ModifyStatModalProps> = ({
               </label>
             </div>
           )}
-          
+
           <div className="flex justify-end space-x-4">
             <button
               type="button"
