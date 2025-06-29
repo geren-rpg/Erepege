@@ -99,11 +99,11 @@ const History: React.FC = () => {
     switch (type) {
       case ActionType.APPLY_DAMAGE:
         return <AlertTriangle size={16} className="text-red-500" />;
-      case ActionType.ADVANCE_TURN:\
+      case ActionType.ADVANCE_TURN:
         return <Clock size={16} className="text-blue-400" />;
       case ActionType.UPDATE_RESISTANCES: // Ícone para atualização de resistências
          return <Shield size={16} className="text-green-400" />;
-      default:\
+      default:
         return <Info size={16} className="text-gray-400" />;
     }
   };
